@@ -31,7 +31,3 @@ class Data:
                 cursor.close()
                 connection.close()
                 print("Соединение с PostgreSQL закрыто")
-
-
-
-

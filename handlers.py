@@ -80,7 +80,7 @@ async def list_of_traders(callback_query: types.CallbackQuery):
         x = f'{i + 1}) {traders[i]}\n'
         result_text.append(x)
 
-    await callback_query.message.answer(text=f'Here i the list of traders:\n{"".join(result_text)}',
+    await callback_query.message.answer(text=f'Here is the list of traders:\n{"".join(result_text)}',
                                         reply_markup=kb.back_to_menu_keyboard)
     await callback_query.answer()
 
