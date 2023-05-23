@@ -1,15 +1,24 @@
+aiodns==3.0.0
 aiofiles==23.1.0
 aiogram @ https://github.com/aiogram/aiogram/archive/refs/heads/dev-3.x.zip#sha256=a1ad4fde8377a141e1bd528bec59df0a6016ada89224fafc7d078628f7499427
 aiohttp==3.8.4
 aiosignal==1.3.1
 async-timeout==4.0.2
 attrs==23.1.0
+ccxt==3.1.5
 certifi==2023.5.7
+cffi==1.15.1
 charset-normalizer==3.1.0
+cryptography==40.0.2
 frozenlist==1.3.3
 idna==3.4
 magic-filter==1.0.9
 multidict==6.0.4
+psycopg2==2.9.6
+pycares==4.3.0
+pycparser==2.21
 pydantic==1.10.7
+requests==2.30.0
 typing_extensions==4.5.0
+urllib3==2.0.2
 yarl==1.9.2
