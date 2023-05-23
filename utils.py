@@ -16,5 +16,4 @@ def check_api_keys(api, secret):
     except:
         return False
 
-
-
+# def mailing(text):
