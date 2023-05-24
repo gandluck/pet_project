@@ -1,7 +1,7 @@
 import psycopg2
 from psycopg2 import Error
 
-from handlers import user
+from states import user
 
 
 class Data:
@@ -74,20 +74,73 @@ class Data:
 
             cursor = connection.cursor()
             cursor.execute(f"""
-            INSERT INTO public."user" ("telegramId", username, nickname, balance, "firstName", "lastName", description, role, "apiKey", "secretKey", "dateAddKey", "validKey", "watchOrders", "referralCode", created_at, updated_at) 
-            VALUES ({user.telegram_id}, {user.username}, {user.nickname}, null, null, null, null, {user.role}, {user.api}, {user.secret_key}, null, true, false, null, null, null);
-            """)
+        INSERT INTO public."user" ("telegramId", username, role) 
+        VALUES ('{user.telegram_id}', '{user.username}', '{user.role}')
+        """)
+
+        except (Exception, Error) as error:
+            print("Ошибка при работе с PostgreSQL", error)
+        finally:
+            if connection:
+                connection.commit()
+                cursor.close()
+                connection.close()
+                print("Соединение с PostgreSQL закрыто")
+
+    @staticmethod
+    def update_data_user_nickname_api_key():
+        try:
+            connection = psycopg2.connect(user="postgres",
+                                          password="Casa512472;)",
+                                          host="127.0.0.1",
+                                          port="5432",
+                                          database="intership")
+
+            cursor = connection.cursor()
+            cursor.execute(f"""
+        UPDATE "user" SET nickname = '{user.nickname}', "apiKey" = '{user.api}', "secretKey" = '{user.secret_key}'
+        WHERE "telegramId" = '{user.telegram_id}'
+        """)
+
+        except (Exception, Error) as error:
+            print("Ошибка при работе с PostgreSQL", error)
+        finally:
+            if connection:
+                connection.commit()
+                cursor.close()
+                connection.close()
+                print("Соединение с PostgreSQL закрыто")
+    @staticmethod
+    def check_nickname(nickname):
+        try:
+            connection = psycopg2.connect(user="postgres",
+                                          password="Casa512472;)",
+                                          host="127.0.0.1",
+                                          port="5432",
+                                          database="intership")
+
+            cursor = connection.cursor()
+            cursor.execute(f"""
+        SELECT nickname FROM "user"
+        """)
 
             record = cursor.fetchall()
             result = []
             for i in record:
                 for j in i:
                     result.append(j)
-            return result
+            print(result)
+            if nickname not in result:
+                return True
+            return False
+
         except (Exception, Error) as error:
             print("Ошибка при работе с PostgreSQL", error)
         finally:
             if connection:
+                connection.commit()
                 cursor.close()
                 connection.close()
                 print("Соединение с PostgreSQL закрыто")
+
+

@@ -10,8 +10,8 @@ import states
 import db
 import utils
 import config
+from states import user
 
-user = states.User()
 router = Router()
 bot = Bot(token=config.BOT_TOKEN)
 
@@ -24,7 +24,7 @@ async def start_handler(msg: Message, state: FSMContext):
                      reply_markup=kb.start_keyboard)
     user.telegram_id = msg.from_user.id
     user.username = msg.from_user.username
-    user.role = 'User'
+    db.Data.create_record_user()
 
 # Хендлер для кнопки "Enter Binance API and secret key"
 @router.callback_query(F.data == "key_and_api")
@@ -48,10 +48,13 @@ async def agreed(callback_query: types.CallbackQuery, state: FSMContext):
 # Хендлер для прием nickname
 @router.message(states.UserStates.unregistered)
 async def nickname(msg: Message, state: FSMContext):
-    user.nickname = msg.text
-    await state.set_state(states.UserStates.unregistered_with_nickname)
-    await msg.answer(text=f'Your nickname is: {user.nickname}',
-                     reply_markup=kb.agreed_keyboard)
+    if db.Data.check_nickname(msg.text):
+        user.nickname = msg.text
+        await state.set_state(states.UserStates.unregistered_with_nickname)
+        await msg.answer(text=f'Your nickname is: {user.nickname}',
+                         reply_markup=kb.agreed_keyboard)
+    else:
+        await msg.answer('Your nickname is occupied by another user.\nPlease, send your nickname again!')
 
 
 # Хендлер для кнопки "Press to enter Binance API"
@@ -79,6 +82,8 @@ async def get_secret_key(msg: Message, state: FSMContext):
         await msg.answer(text='Your keys are correct!')
         await state.set_state(states.UserStates.registered)
         await msg.answer(text=text.registration_text, reply_markup=kb.menu_user_keyboard)
+        db.Data.update_data_user_nickname_api_key()
+
     else:
         await state.set_state(states.UserStates.unregistered)
         await msg.answer(text='Your keys are wrong, please, send your API again', reply_markup=kb.agreed_keyboard)
