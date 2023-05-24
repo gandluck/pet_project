@@ -199,10 +199,10 @@ async def toping_up_balance(msg: Message):
     db.Data.top_up_balance()
     print(db.Data.get_role())
     if db.Data.get_role() == 'User':
-        await msg.answer(text=f'Your balance has been sucessfully toped up!\nYour balance: {user.balance}',
+        await msg.answer(text=f'Your balance has been sucessfully toped up!\nYour balance: {db.Data.get_balance()}',
                          reply_markup=kb.back_to_menu_keyboard)
     else:
-        await msg.answer(text=f'Your balance has been sucessfully toped up!\nYour balance: {user.balance}',
+        await msg.answer(text=f'Your balance has been sucessfully toped up!\nYour balance: {db.Data.get_balance()}',
                          reply_markup=kb.back_to_menu_tr_keyboard)
 
 
