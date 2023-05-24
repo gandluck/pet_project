@@ -23,7 +23,8 @@ async def start_handler(msg: Message, state: FSMContext):
     await msg.answer(text=text.start_text,
                      reply_markup=kb.start_keyboard)
     user.telegram_id = msg.from_user.id
-
+    user.username = msg.from_user.username
+    user.role = 'User'
 
 # Хендлер для кнопки "Enter Binance API and secret key"
 @router.callback_query(F.data == "key_and_api")
@@ -156,6 +157,7 @@ async def rate1(callback_query: types.CallbackQuery, state: FSMContext):
     await callback_query.message.answer(
         text='Заглушка проверки успешности проведения транзакции.\nТранзакция прошла успешно')
     await state.set_state(states.UserStates.traider)
+    user.role = 'Traider'
     await callback_query.answer()
     await callback_query.message.answer(text='Here is your menu',
                                         reply_markup=kb.menu_traider_keyboard)
@@ -224,7 +226,7 @@ async def mailing_yes(callback_query: types.CallbackQuery):
     # for i in lst:
     #     await bot.send_message(chat_id=i,
     #                            text=user.text_for_mailing)
-    for i in db.Data.get_ids_for_mailing(user.telegram_id):
+    for i in db.Data.get_ids_for_mailing():
         await bot.send_message(chat_id=i,
                                text=user.text_for_mailing)
     await callback_query.message.answer(text='The mailing was made successfully!',
