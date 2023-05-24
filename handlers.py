@@ -26,6 +26,7 @@ async def start_handler(msg: Message, state: FSMContext):
     user.username = msg.from_user.username
     db.Data.create_record_user()
 
+
 # Хендлер для кнопки "Enter Binance API and secret key"
 @router.callback_query(F.data == "key_and_api")
 async def agreement(callback_query: types.CallbackQuery):
@@ -127,7 +128,7 @@ async def menu(callback_query: types.CallbackQuery):
 # Хендлер для кнопки "Become a traider"
 @router.callback_query(F.data == "become_trdr")
 async def become_tradier(callback_query: types.CallbackQuery):
-    await callback_query.message.answer(text='Your balance: Заглушка')
+    await callback_query.message.answer(text=f'Your balance: {db.Data.get_balance()}')
     await callback_query.message.answer(
         text='Here is a list of subscription rates:\n1) Первый тариф\n2) Второй тариф\n3) Третий тариф\nВыберите тариф',
         reply_markup=kb.rates_keyboard)
@@ -139,6 +140,8 @@ async def become_tradier(callback_query: types.CallbackQuery):
 async def rate1(callback_query: types.CallbackQuery, state: FSMContext):
     await callback_query.message.answer(
         text='Заглушка проверки успешности проведения транзакции.\nТранзакция прошла успешно')
+    user.role = 'Traider'
+    db.Data.update_data_user_become_traider()
     await state.set_state(states.UserStates.traider)
     await callback_query.answer()
     await callback_query.message.answer(text='Here is your menu',
@@ -151,6 +154,8 @@ async def rate1(callback_query: types.CallbackQuery, state: FSMContext):
     await callback_query.message.answer(
         text='Заглушка проверки успешности проведения транзакции.\nТранзакция прошла успешно')
     await state.set_state(states.UserStates.traider)
+    user.role = 'Traider'
+    db.Data.update_data_user_become_traider()
     await callback_query.answer()
     await callback_query.message.answer(text='Here is your menu',
                                         reply_markup=kb.menu_traider_keyboard)
@@ -163,9 +168,11 @@ async def rate1(callback_query: types.CallbackQuery, state: FSMContext):
         text='Заглушка проверки успешности проведения транзакции.\nТранзакция прошла успешно')
     await state.set_state(states.UserStates.traider)
     user.role = 'Traider'
+    db.Data.update_data_user_become_traider()
     await callback_query.answer()
     await callback_query.message.answer(text='Here is your menu',
                                         reply_markup=kb.menu_traider_keyboard)
+
 
 
 # Хендлер для кнопки "Statistics"
@@ -175,13 +182,29 @@ async def stat(callback_query: types.CallbackQuery):
     await callback_query.message.answer(text='Заглушка',
                                         reply_markup=kb.back_to_menu_tr_keyboard)
 
-
+#Ветка для "Balance
 # Хендлер для кнопки "Balance"
 @router.callback_query(F.data == "balance")
-async def stat(callback_query: types.CallbackQuery):
+async def stat(callback_query: types.CallbackQuery, state: FSMContext):
     await callback_query.answer()
-    await callback_query.message.answer(text='Заглушка',
-                                        reply_markup=kb.back_to_menu_tr_keyboard)
+    await callback_query.message.answer(text='Напишите сумму, на которую вы хотите пополнить баланс')
+    await state.set_state(states.UserStates.balance)
+
+#Хендлер для приема суммы для пополнения баланса
+@router.message(states.UserStates.balance)
+async def toping_up_balance(msg: Message):
+    user.balance = msg.text
+    db.Data.top_up_balance()
+    await msg.answer(text=f'Your balance has been sucessfully toped up!\nYour balance: {user.balance}',
+                     reply_markup=kb.back_to_menu_tr_keyboard)
+
+
+
+
+
+
+
+
 
 
 # Хендлер для кнопки "Mailing"
@@ -227,10 +250,6 @@ async def mailing_no(callback_query: types.CallbackQuery):
 # Хендлер для кнопки "Yes" при подтверждениии сообщения для рассылки
 @router.callback_query(F.data == "mailing_yes")
 async def mailing_yes(callback_query: types.CallbackQuery):
-    # lst = [827694335, 1043075099]
-    # for i in lst:
-    #     await bot.send_message(chat_id=i,
-    #                            text=user.text_for_mailing)
     for i in db.Data.get_ids_for_mailing():
         await bot.send_message(chat_id=i,
                                text=user.text_for_mailing)

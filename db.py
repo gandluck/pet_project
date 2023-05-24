@@ -110,6 +110,7 @@ class Data:
                 cursor.close()
                 connection.close()
                 print("Соединение с PostgreSQL закрыто")
+
     @staticmethod
     def check_nickname(nickname):
         try:
@@ -143,4 +144,78 @@ class Data:
                 connection.close()
                 print("Соединение с PostgreSQL закрыто")
 
+    @staticmethod
+    def update_data_user_become_traider():
+        try:
+            connection = psycopg2.connect(user="postgres",
+                                          password="Casa512472;)",
+                                          host="127.0.0.1",
+                                          port="5432",
+                                          database="intership")
+
+            cursor = connection.cursor()
+            cursor.execute(f"""
+               UPDATE "user" SET role = '{user.role}'
+               WHERE "telegramId" = '{user.telegram_id}'
+               """)
+
+        except (Exception, Error) as error:
+            print("Ошибка при работе с PostgreSQL", error)
+        finally:
+            if connection:
+                connection.commit()
+                cursor.close()
+                connection.close()
+                print("Соединение с PostgreSQL закрыто")
+
+    @staticmethod
+    def get_balance():
+        try:
+            connection = psycopg2.connect(user="postgres",
+                                          password="Casa512472;)",
+                                          host="127.0.0.1",
+                                          port="5432",
+                                          database="intership")
+
+            cursor = connection.cursor()
+            cursor.execute(f"""
+               SELECT balance FROM "user"
+               WHERE "telegramId" = '{user.telegram_id}'
+               """)
+
+            balance = cursor.fetchone()
+            return balance[0]
+
+        except (Exception, Error) as error:
+            print("Ошибка при работе с PostgreSQL", error)
+        finally:
+            if connection:
+                connection.commit()
+                cursor.close()
+                connection.close()
+                print("Соединение с PostgreSQL закрыто")
+
+    @staticmethod
+    def top_up_balance():
+        try:
+            connection = psycopg2.connect(user="postgres",
+                                          password="Casa512472;)",
+                                          host="127.0.0.1",
+                                          port="5432",
+                                          database="intership")
+
+            cursor = connection.cursor()
+            cursor.execute(f"""
+               UPDATE "user" SET balance = '{user.balance}'
+               WHERE "telegramId" = '{user.telegram_id}' 
+               """)
+
+        except (Exception, Error) as error:
+            print("Ошибка при работе с PostgreSQL", error)
+        finally:
+            if connection:
+                connection.commit()
+                cursor.close()
+                connection.close()
+                print("Соединение с PostgreSQL закрыто")
 

@@ -9,11 +9,12 @@ class UserStates(StatesGroup):
     registered = State()
     traider = State()
     mailing = State()
+    balance = State()
 
 
 class User:
     def __init__(self, api=None, secret_key=None, nickname=None, telegram_id=None, text_for_mailing=None, username=None,
-                 role='User', subscribtion=False):
+                 role='User', subscribtion=False, balance=0):
         self.api = api
         self.secret_key = secret_key
         self.nickname = nickname
@@ -22,6 +23,7 @@ class User:
         self.username = username
         self.role = role
         self.subscribtion = subscribtion
+        self.balance = balance
 
 
 user = User()
