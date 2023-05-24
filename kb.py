@@ -55,14 +55,14 @@ rates_keyboard = InlineKeyboardMarkup(
 )
 
 stat = InlineKeyboardButton(text='Statistics', callback_data='stat')
-# balance = InlineKeyboardButton(text='Balance', callback_data='balance')
+balance = InlineKeyboardButton(text='Balance', callback_data='balance')
 mailing = InlineKeyboardButton(text='Mailing', callback_data='mailing')
 settings = InlineKeyboardButton(text='Settings', callback_data='settings')
 
 menu_traider_keyboard = InlineKeyboardMarkup(
     inline_keyboard=[
         [stat],
-        [top_up_b2],
+        [balance],
         [mailing],
         [settings]]
 )

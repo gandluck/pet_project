@@ -41,18 +41,18 @@ async def agreement(callback_query: types.CallbackQuery):
 # Хендлер для кнопки "Yes, i agree"(пользовательское соглашение)
 @router.callback_query(F.data == "agreement")
 async def agreed(callback_query: types.CallbackQuery, state: FSMContext):
-    await state.set_state(states.UserStates.unregistered)
+    await state.set_state(states.UserStates.nickname)
     await callback_query.message.answer(
         text='You have successfully accepted the agreement!\nPlease, send your nickname')
+    await callback_query.answer()
 
 
 # Хендлер для прием nickname
-@router.message(states.UserStates.unregistered)
+@router.message(states.UserStates.nickname)
 async def nickname(msg: Message, state: FSMContext):
     if db.Data.check_nickname(msg.text):
         user.nickname = msg.text
-        await state.set_state(states.UserStates.unregistered_with_nickname)
-        await msg.answer(text=f'Your nickname is: {user.nickname}',
+        await msg.answer(text=f'Your nickname is: {user.nickname}\nIf you want to change it, just send it again',
                          reply_markup=kb.agreed_keyboard)
     else:
         await msg.answer('Your nickname is occupied by another user.\nPlease, send your nickname again!')
@@ -60,8 +60,9 @@ async def nickname(msg: Message, state: FSMContext):
 
 # Хендлер для кнопки "Press to enter Binance API"
 @router.callback_query(F.data == "api")
-async def callback_query_handler(callback_query: types.CallbackQuery):
+async def callback_query_handler(callback_query: types.CallbackQuery, state: FSMContext):
     await callback_query.message.answer(text='Please, send your Binance API', reply_markup=kb.manual_keyboard)
+    await state.set_state(states.UserStates.unregistered_with_nickname)
     await callback_query.answer()
 
 
@@ -104,13 +105,6 @@ async def list_of_traders(callback_query: types.CallbackQuery):
     await callback_query.answer()
 
 
-# Хендлер для кнопки "Top up balance"
-@router.callback_query(F.data == "top_up")
-async def top_up_balance(callback_query: types.CallbackQuery):
-    await callback_query.message.answer(text='Здесь будет пополнение аккаунта', reply_markup=kb.back_to_menu_keyboard)
-    await callback_query.answer()
-
-
 # Хендлер для кнопки "Instructions"
 @router.callback_query(F.data == "instructions")
 async def instructions(callback_query: types.CallbackQuery):
@@ -119,7 +113,7 @@ async def instructions(callback_query: types.CallbackQuery):
 
 
 # Хендлер для кнопки "Back to menu" для registered
-@router.callback_query(states.UserStates.registered, F.data == "back_to_menu")
+@router.callback_query(F.data == "back_to_menu")
 async def menu(callback_query: types.CallbackQuery):
     await callback_query.message.answer(text='Here is the menu', reply_markup=kb.menu_user_keyboard)
     await callback_query.answer()
@@ -174,7 +168,6 @@ async def rate1(callback_query: types.CallbackQuery, state: FSMContext):
                                         reply_markup=kb.menu_traider_keyboard)
 
 
-
 # Хендлер для кнопки "Statistics"
 @router.callback_query(F.data == "stat")
 async def stat(callback_query: types.CallbackQuery):
@@ -182,29 +175,35 @@ async def stat(callback_query: types.CallbackQuery):
     await callback_query.message.answer(text='Заглушка',
                                         reply_markup=kb.back_to_menu_tr_keyboard)
 
-#Ветка для "Balance
+
+# Все хендлеры для взаимодействия с балансом
 # Хендлер для кнопки "Balance"
 @router.callback_query(F.data == "balance")
+@router.callback_query(F.data == "top_up")
 async def stat(callback_query: types.CallbackQuery, state: FSMContext):
     await callback_query.answer()
-    await callback_query.message.answer(text='Напишите сумму, на которую вы хотите пополнить баланс')
+    if db.Data.get_role() == 'User':
+        await callback_query.message.answer(text=f'Your balance: {db.Data.get_balance()}\nPlease, send how much you want to put on your balance',
+                                            reply_markup=kb.back_to_menu_keyboard)
+    else:
+        await callback_query.message.answer(text=f'Your balance: {db.Data.get_balance()}\nPlease, send how much you want to put on your balance',
+                                            reply_markup=kb.back_to_menu_tr_keyboard)
+
     await state.set_state(states.UserStates.balance)
 
-#Хендлер для приема суммы для пополнения баланса
+
+# Хендлер для приема суммы для пополнения баланса
 @router.message(states.UserStates.balance)
 async def toping_up_balance(msg: Message):
-    user.balance = msg.text
+    user.balance += int(msg.text)
     db.Data.top_up_balance()
-    await msg.answer(text=f'Your balance has been sucessfully toped up!\nYour balance: {user.balance}',
-                     reply_markup=kb.back_to_menu_tr_keyboard)
-
-
-
-
-
-
-
-
+    print(db.Data.get_role())
+    if db.Data.get_role() == 'User':
+        await msg.answer(text=f'Your balance has been sucessfully toped up!\nYour balance: {user.balance}',
+                         reply_markup=kb.back_to_menu_keyboard)
+    else:
+        await msg.answer(text=f'Your balance has been sucessfully toped up!\nYour balance: {user.balance}',
+                         reply_markup=kb.back_to_menu_tr_keyboard)
 
 
 # Хендлер для кнопки "Mailing"

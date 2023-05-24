@@ -17,7 +17,7 @@ class Data:
             cursor = connection.cursor()
             cursor.execute('''
             SELECT nickname from "user"
-            WHERE "role" = 'Traider' AND "validKey" = true
+            WHERE "role" = 'Traider'
             ''')
 
             record = cursor.fetchall()
@@ -219,3 +219,28 @@ class Data:
                 connection.close()
                 print("Соединение с PostgreSQL закрыто")
 
+    @staticmethod
+    def get_role():
+        try:
+            connection = psycopg2.connect(user="postgres",
+                                          password="Casa512472;)",
+                                          host="127.0.0.1",
+                                          port="5432",
+                                          database="intership")
+
+            cursor = connection.cursor()
+            cursor.execute(f"""
+               SELECT role FROM "user"
+               WHERE "telegramId" = '{user.telegram_id}'
+               """)
+            role = cursor.fetchone()
+            return role[0]
+
+        except (Exception, Error) as error:
+            print("Ошибка при работе с PostgreSQL", error)
+        finally:
+            if connection:
+                connection.commit()
+                cursor.close()
+                connection.close()
+                print("Соединение с PostgreSQL закрыто")

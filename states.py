@@ -10,6 +10,7 @@ class UserStates(StatesGroup):
     traider = State()
     mailing = State()
     balance = State()
+    nickname = State()
 
 
 class User:
