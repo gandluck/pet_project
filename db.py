@@ -185,7 +185,7 @@ class Data:
                """)
 
             balance = cursor.fetchone()
-            if balance[0] == None:
+            if balance == None:
                 return 0
             return balance[0]
 

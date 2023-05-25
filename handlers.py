@@ -130,9 +130,11 @@ async def subscribtion(callback_query: types.CallbackQuery):
     if nickname_of_traider == None:
         await callback_query.message.answer(text='You do not have subscribtion now',
                                     reply_markup=kb.back_to_menu_keyboard)
+        await callback_query.answer()
     else:
         await callback_query.message.answer(text=f'You have subscribtion for "{db.Data.check_subscribe()}"',
                                     reply_markup=kb.back_to_menu_keyboard)
+        await callback_query.answer()
 
 # Хендлер для кнопки "Instructions"
 @router.callback_query(F.data == "instructions")

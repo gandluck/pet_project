@@ -52,7 +52,8 @@ rates_keyboard = InlineKeyboardMarkup(
         [rate1_b],
         [rate2_b],
         [rate3_b],
-        [top_up_b2]
+        [top_up_b2],
+        [back_to_menu_b1]
     ]
 )
 
