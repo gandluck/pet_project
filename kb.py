@@ -29,12 +29,14 @@ become_trdr = InlineKeyboardButton(text="Become a traider", callback_data="becom
 list_of_traders_b1 = InlineKeyboardButton(text="List of traders", callback_data="list_of_traders")
 top_up_b2 = InlineKeyboardButton(text="Top up account balance", callback_data="top_up")
 instructions_b3 = InlineKeyboardButton(text="Instructions", callback_data="instructions")
+subscribtion = InlineKeyboardButton(text="Subscribtion", callback_data="subscribtion")
 
 menu_user_keyboard = InlineKeyboardMarkup(
     inline_keyboard=[[list_of_traders_b1],
                      [top_up_b2],
                      [become_trdr],
-                     [instructions_b3]]
+                     [instructions_b3],
+                     [subscribtion]]
 )
 back_to_menu_b1 = InlineKeyboardButton(text="Back to menu", callback_data="back_to_menu")
 
@@ -58,13 +60,15 @@ stat = InlineKeyboardButton(text='Statistics', callback_data='stat')
 balance = InlineKeyboardButton(text='Balance', callback_data='balance')
 mailing = InlineKeyboardButton(text='Mailing', callback_data='mailing')
 settings = InlineKeyboardButton(text='Settings', callback_data='settings')
+create_ref_link = InlineKeyboardButton(text='Create referral link', callback_data='create_ref_link')
 
 menu_traider_keyboard = InlineKeyboardMarkup(
     inline_keyboard=[
         [stat],
         [balance],
         [mailing],
-        [settings]]
+        [settings],
+        [create_ref_link]]
 )
 
 back_to_menu_b2 = InlineKeyboardButton(text="Back to menu", callback_data="back_to_menu_tr")

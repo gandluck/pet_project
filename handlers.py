@@ -21,7 +21,6 @@ dp = Dispatcher()
 # Хендлер для начальной команды /start
 @router.message(Command('start'))
 async def start_handler(msg: Message, state: FSMContext):
-    # await bot.send_message(msg.from_user.id, f'https://t.me/{config.BOT_NAME}?start={msg.from_user.id}')
     if msg.from_user.id not in db.Data.get_all_ids():
         start_command = msg.text
         referrer_id = str(start_command[7:])
@@ -124,6 +123,16 @@ async def list_of_traders(callback_query: types.CallbackQuery):
                                         reply_markup=kb.back_to_menu_keyboard)
     await callback_query.answer()
 
+#Хендлер для книпки "Subscribtion"
+@router.callback_query(F.data == "subscribtion")
+async def subscribtion(callback_query: types.CallbackQuery):
+    nickname_of_traider = db.Data.check_subscribe()
+    if nickname_of_traider == None:
+        await callback_query.message.answer(text='You do not have subscribtion now',
+                                    reply_markup=kb.back_to_menu_keyboard)
+    else:
+        await callback_query.message.answer(text=f'You have subscribtion for "{db.Data.check_subscribe()}"',
+                                    reply_markup=kb.back_to_menu_keyboard)
 
 # Хендлер для кнопки "Instructions"
 @router.callback_query(F.data == "instructions")
@@ -192,7 +201,7 @@ async def rate1(callback_query: types.CallbackQuery, state: FSMContext):
 @router.callback_query(F.data == "stat")
 async def stat(callback_query: types.CallbackQuery):
     await callback_query.answer()
-    await callback_query.message.answer(text='Заглушка',
+    await callback_query.message.answer(text=f'Your amount of referralers: {db.Data.get_amount_of_referralers()}',
                                         reply_markup=kb.back_to_menu_tr_keyboard)
 
 
@@ -248,6 +257,15 @@ async def stat(callback_query: types.CallbackQuery):
     await callback_query.answer()
     await callback_query.message.answer(text='Заглушка',
                                         reply_markup=kb.back_to_menu_tr_keyboard)
+
+#Хендлер для кнопки "Create referral link"
+@router.callback_query(F.data == "create_ref_link")
+async def create_ref_link(callback_query: types.CallbackQuery):
+    await callback_query.message.answer(text=f'Your referral link is:\nhttps://t.me/{config.BOT_NAME}?start={callback_query.message.from_user.id}',
+                                        reply_markup=kb.back_to_menu_tr_keyboard)
+    await callback_query.answer()
+
+
 
 
 # Хендлре для кнопки "Back to menu" для traider
