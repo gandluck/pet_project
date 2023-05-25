@@ -4,6 +4,7 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import FSInputFile
 
+
 import text
 import kb
 import states
@@ -14,17 +15,36 @@ from states import user
 
 router = Router()
 bot = Bot(token=config.BOT_TOKEN)
+dp = Dispatcher()
 
 
 # Хендлер для начальной команды /start
-@router.message(Command("start"))
+@router.message(Command('start'))
 async def start_handler(msg: Message, state: FSMContext):
-    await state.set_state(states.UserStates.unconfirmed)
-    await msg.answer(text=text.start_text,
-                     reply_markup=kb.start_keyboard)
-    user.telegram_id = msg.from_user.id
-    user.username = msg.from_user.username
-    db.Data.create_record_user()
+    # await bot.send_message(msg.from_user.id, f'https://t.me/{config.BOT_NAME}?start={msg.from_user.id}')
+    if msg.from_user.id not in db.Data.get_all_ids():
+        start_command = msg.text
+        referrer_id = str(start_command[7:])
+        if str(referrer_id) != "":
+            if str(referrer_id) != str(msg.from_user.id):
+                db.Data.create_subscribtion(msg.from_user.id, referrer_id)
+                await msg.answer(text=f'You have been successfully subscribed for "{db.Data.get_traider_nickname_by_telegramid(referrer_id)}"')
+                await state.set_state(states.UserStates.unconfirmed)
+                await msg.answer(text=text.start_text,
+                                 reply_markup=kb.start_keyboard)
+                user.telegram_id = msg.from_user.id
+                user.username = msg.from_user.username
+                user.role = 'User'
+                db.Data.create_record_user()
+            else:
+                await msg.answer(text='You cannot register with your own link!')
+        else:
+            await state.set_state(states.UserStates.unconfirmed)
+            await msg.answer(text=text.start_text,
+                             reply_markup=kb.start_keyboard)
+            user.telegram_id = msg.from_user.id
+            user.username = msg.from_user.username
+            db.Data.create_record_user()
 
 
 # Хендлер для кнопки "Enter Binance API and secret key"

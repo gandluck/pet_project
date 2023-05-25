@@ -184,6 +184,8 @@ class Data:
                """)
 
             balance = cursor.fetchone()
+            if balance[0] == None:
+                return 0
             return balance[0]
 
         except (Exception, Error) as error:
@@ -245,3 +247,79 @@ class Data:
                 connection.close()
                 print("Соединение с PostgreSQL закрыто")
 
+    @staticmethod
+    def get_all_ids():
+        try:
+            connection = psycopg2.connect(user="postgres",
+                                          password="Casa512472;)",
+                                          host="127.0.0.1",
+                                          port="5432",
+                                          database="intership")
+
+            cursor = connection.cursor()
+            cursor.execute(f"""
+            SELECT "telegramId" FROM "user"
+            """)
+
+            record = cursor.fetchall()
+            result = []
+            for i in record:
+                for j in i:
+                    result.append(j)
+            return result
+        except (Exception, Error) as error:
+            print("Ошибка при работе с PostgreSQL", error)
+        finally:
+            if connection:
+                cursor.close()
+                connection.close()
+                print("Соединение с PostgreSQL закрыто")
+
+    @staticmethod
+    def get_traider_nickname_by_telegramid(traider_telegramid):
+        try:
+            connection = psycopg2.connect(user="postgres",
+                                          password="Casa512472;)",
+                                          host="127.0.0.1",
+                                          port="5432",
+                                          database="intership")
+
+            cursor = connection.cursor()
+            cursor.execute(f"""
+            SELECT nickname FROM "user" WHERE "telegramId" = '{traider_telegramid}'
+            """)
+
+            result = cursor.fetchone()
+            return result[0]
+        except (Exception, Error) as error:
+            print("Ошибка при работе с PostgreSQL", error)
+        finally:
+            if connection:
+                cursor.close()
+                connection.close()
+                print("Соединение с PostgreSQL закрыто")
+
+
+    @staticmethod
+    def create_subscribtion(user_telegram_id, traider_telegram_id):
+        try:
+            connection = psycopg2.connect(user="postgres",
+                                          password="Casa512472;)",
+                                          host="127.0.0.1",
+                                          port="5432",
+                                          database="intership")
+
+            cursor = connection.cursor()
+            cursor.execute(f"""
+        INSERT INTO public."subscribe" ("userTelegramId", "traiderTelegramId") 
+        VALUES ('{user_telegram_id}', '{traider_telegram_id}')
+        """)
+
+        except (Exception, Error) as error:
+            print("Ошибка при работе с PostgreSQL", error)
+        finally:
+            if connection:
+                connection.commit()
+                cursor.close()
+                connection.close()
+                print("Соединение с PostgreSQL закрыто")
