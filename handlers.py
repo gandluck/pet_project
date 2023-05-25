@@ -26,15 +26,15 @@ async def start_handler(msg: Message, state: FSMContext):
         referrer_id = str(start_command[7:])
         if str(referrer_id) != "":
             if str(referrer_id) != str(msg.from_user.id):
-                db.Data.create_subscribtion(msg.from_user.id, referrer_id)
-                await msg.answer(text=f'You have been successfully subscribed for "{db.Data.get_traider_nickname_by_telegramid(referrer_id)}"')
-                await state.set_state(states.UserStates.unconfirmed)
-                await msg.answer(text=text.start_text,
-                                 reply_markup=kb.start_keyboard)
                 user.telegram_id = msg.from_user.id
                 user.username = msg.from_user.username
                 user.role = 'User'
                 db.Data.create_record_user()
+                db.Data.create_subscribtion(user.telegram_id, referrer_id)
+                await msg.answer(text=f'You have been successfully subscribed for "{db.Data.get_traider_nickname_by_telegramid(referrer_id)}"')
+                await state.set_state(states.UserStates.unconfirmed)
+                await msg.answer(text=text.start_text,
+                                 reply_markup=kb.start_keyboard)
             else:
                 await msg.answer(text='You cannot register with your own link!')
         else:
@@ -229,11 +229,15 @@ async def toping_up_balance(msg: Message):
     user.balance += int(msg.text)
     db.Data.top_up_balance()
     print(db.Data.get_role())
+    if type(db.Data.get_balance()) in (None,):
+        balance = 0
+    else:
+        balance = db.Data.get_balance()
     if db.Data.get_role() == 'User':
-        await msg.answer(text=f'Your balance has been sucessfully toped up!\nYour balance: {db.Data.get_balance()}',
+        await msg.answer(text=f'Your balance has been sucessfully toped up!\nYour balance: {balance}',
                          reply_markup=kb.back_to_menu_keyboard)
     else:
-        await msg.answer(text=f'Your balance has been sucessfully toped up!\nYour balance: {db.Data.get_balance()}',
+        await msg.answer(text=f'Your balance has been sucessfully toped up!\nYour balance: {balance}',
                          reply_markup=kb.back_to_menu_tr_keyboard)
 
 
@@ -263,7 +267,7 @@ async def stat(callback_query: types.CallbackQuery):
 #Хендлер для кнопки "Create referral link"
 @router.callback_query(F.data == "create_ref_link")
 async def create_ref_link(callback_query: types.CallbackQuery):
-    await callback_query.message.answer(text=f'Your referral link is:\nhttps://t.me/{config.BOT_NAME}?start={callback_query.message.from_user.id}',
+    await callback_query.message.answer(text=f'Your referral link is:\nhttps://t.me/{config.BOT_NAME}?start={user.telegram_id}',
                                         reply_markup=kb.back_to_menu_tr_keyboard)
     await callback_query.answer()
 

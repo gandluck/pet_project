@@ -184,10 +184,11 @@ class Data:
                WHERE "telegramId" = '{user.telegram_id}'
                """)
 
-            balance = cursor.fetchone()
-            if balance == None:
+            balance_tuple = cursor.fetchone()
+            balance = balance_tuple[0]
+            if type(balance) is None:
                 return 0
-            return balance[0]
+            return balance
 
         except (Exception, Error) as error:
             print("Ошибка при работе с PostgreSQL", error)
@@ -312,8 +313,7 @@ class Data:
 
             cursor = connection.cursor()
             cursor.execute(f"""
-        INSERT INTO public."subscribe" ("userTelegramId", "traiderTelegramId") 
-        VALUES ('{user_telegram_id}', '{traider_telegram_id}')
+        INSERT INTO public."subscribe" ("userTelegramId", "traiderTelegramId") VALUES ('{user_telegram_id}', '{traider_telegram_id}')
         """)
 
         except (Exception, Error) as error:
