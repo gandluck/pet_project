@@ -45,6 +45,7 @@ class Data:
                                           database="intership")
 
             cursor = connection.cursor()
+            print(user.telegram_id)
             cursor.execute(f"""
             SELECT "userTelegramId" FROM "subscribe"
             WHERE "traiderTelegramId" = '{user.telegram_id}'
@@ -186,7 +187,10 @@ class Data:
 
             balance_tuple = cursor.fetchone()
             balance = balance_tuple[0]
-            if type(balance) is None:
+            print(balance)
+            print(type(balance))
+            if balance is None:
+                print(balance)
                 return 0
             return balance
 
@@ -301,7 +305,6 @@ class Data:
                 connection.close()
                 print("Соединение с PostgreSQL закрыто")
 
-
     @staticmethod
     def create_subscribtion(user_telegram_id, traider_telegram_id):
         try:
@@ -324,7 +327,6 @@ class Data:
                 cursor.close()
                 connection.close()
                 print("Соединение с PostgreSQL закрыто")
-
 
     @staticmethod
     def check_subscribe():
@@ -382,4 +384,3 @@ class Data:
                 cursor.close()
                 connection.close()
                 print("Соединение с PostgreSQL закрыто")
-
