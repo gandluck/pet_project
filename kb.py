@@ -32,8 +32,7 @@ instructions_b3 = InlineKeyboardButton(text="Instructions", callback_data="instr
 subscribtion = InlineKeyboardButton(text="Subscribtion", callback_data="subscribtion")
 
 menu_user_keyboard = InlineKeyboardMarkup(
-    inline_keyboard=[[list_of_traders_b1],
-                     [top_up_b2],
+    inline_keyboard=[[top_up_b2],
                      [become_trdr],
                      [instructions_b3],
                      [subscribtion]]
