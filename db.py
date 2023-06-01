@@ -1,7 +1,6 @@
 import psycopg2
 from psycopg2 import Error
 
-from states import user
 import config
 
 
@@ -36,7 +35,7 @@ class Data:
                 print("Соединение с PostgreSQL закрыто")
 
     @staticmethod
-    def get_ids_for_mailing():
+    def get_ids_for_mailing(telegram_id):
         try:
             connection = psycopg2.connect(user="postgres",
                                           password="Casa512472;)",
@@ -45,10 +44,9 @@ class Data:
                                           database="intership")
 
             cursor = connection.cursor()
-            print(user.telegram_id)
             cursor.execute(f"""
             SELECT "userTelegramId" FROM "subscribe"
-            WHERE "traiderTelegramId" = '{user.telegram_id}'
+            WHERE "traiderTelegramId" = '{telegram_id}'
             """)
 
             record = cursor.fetchall()
@@ -56,6 +54,8 @@ class Data:
             for i in record:
                 for j in i:
                     result.append(j)
+            if result is None:
+                return []
             return result
         except (Exception, Error) as error:
             print("Ошибка при работе с PostgreSQL", error)
@@ -66,7 +66,7 @@ class Data:
                 print("Соединение с PostgreSQL закрыто")
 
     @staticmethod
-    def create_record_user():
+    def create_record_user(telegram_id, username):
         try:
             connection = psycopg2.connect(user="postgres",
                                           password="Casa512472;)",
@@ -77,7 +77,7 @@ class Data:
             cursor = connection.cursor()
             cursor.execute(f"""
         INSERT INTO public."user" ("telegramId", username, role) 
-        VALUES ('{user.telegram_id}', '{user.username}', '{user.role}')
+        VALUES ('{telegram_id}', '{username}', 'User')
         """)
 
         except (Exception, Error) as error:
@@ -90,7 +90,7 @@ class Data:
                 print("Соединение с PostgreSQL закрыто")
 
     @staticmethod
-    def update_data_user_nickname_api_key():
+    def update_data_user_nickname(telegram_id, nickname):
         try:
             connection = psycopg2.connect(user="postgres",
                                           password="Casa512472;)",
@@ -100,8 +100,56 @@ class Data:
 
             cursor = connection.cursor()
             cursor.execute(f"""
-        UPDATE "user" SET nickname = '{user.nickname}', "apiKey" = '{user.api}', "secretKey" = '{user.secret_key}'
-        WHERE "telegramId" = '{user.telegram_id}'
+        UPDATE "user" SET nickname = '{nickname}'
+        WHERE "telegramId" = '{telegram_id}'
+        """)
+
+        except (Exception, Error) as error:
+            print("Ошибка при работе с PostgreSQL", error)
+        finally:
+            if connection:
+                connection.commit()
+                cursor.close()
+                connection.close()
+                print("Соединение с PostgreSQL закрыто")
+
+    @staticmethod
+    def update_data_user_api(telegram_id, api):
+        try:
+            connection = psycopg2.connect(user="postgres",
+                                          password="Casa512472;)",
+                                          host="127.0.0.1",
+                                          port="5432",
+                                          database="intership")
+
+            cursor = connection.cursor()
+            cursor.execute(f"""
+        UPDATE "user" SET "apiKey" = '{api}'
+        WHERE "telegramId" = '{telegram_id}'
+        """)
+
+        except (Exception, Error) as error:
+            print("Ошибка при работе с PostgreSQL", error)
+        finally:
+            if connection:
+                connection.commit()
+                cursor.close()
+                connection.close()
+                print("Соединение с PostgreSQL закрыто")
+
+    @staticmethod
+    def update_data_user_key(telegram_id, secret_key):
+        try:
+            connection = psycopg2.connect(user="postgres",
+                                          password="Casa512472;)",
+                                          host="127.0.0.1",
+                                          port="5432",
+                                          database="intership")
+
+            cursor = connection.cursor()
+            cursor.execute(f"""
+        UPDATE "user" SET "secretKey" = '{secret_key}'
+        WHERE "telegramId" = '{telegram_id}'
         """)
 
         except (Exception, Error) as error:
@@ -132,7 +180,6 @@ class Data:
             for i in record:
                 for j in i:
                     result.append(j)
-            print(result)
             if nickname not in result:
                 return True
             return False
@@ -147,7 +194,7 @@ class Data:
                 print("Соединение с PostgreSQL закрыто")
 
     @staticmethod
-    def update_data_user_become_traider():
+    def update_data_user_become_traider(telegram_id):
         try:
             connection = psycopg2.connect(user="postgres",
                                           password="Casa512472;)",
@@ -157,8 +204,8 @@ class Data:
 
             cursor = connection.cursor()
             cursor.execute(f"""
-               UPDATE "user" SET role = '{user.role}'
-               WHERE "telegramId" = '{user.telegram_id}'
+               UPDATE "user" SET role = 'Traider'
+               WHERE "telegramId" = '{telegram_id}'
                """)
 
         except (Exception, Error) as error:
@@ -171,7 +218,7 @@ class Data:
                 print("Соединение с PostgreSQL закрыто")
 
     @staticmethod
-    def get_balance():
+    def get_balance(telegram_id):
         try:
             connection = psycopg2.connect(user="postgres",
                                           password="Casa512472;)",
@@ -182,17 +229,15 @@ class Data:
             cursor = connection.cursor()
             cursor.execute(f"""
                SELECT balance FROM "user"
-               WHERE "telegramId" = '{user.telegram_id}'
+               WHERE "telegramId" = '{telegram_id}'
                """)
 
-            balance_tuple = cursor.fetchone()
-            balance = balance_tuple[0]
-            print(balance)
-            print(type(balance))
-            if balance is None:
-                print(balance)
+            balance = cursor.fetchone()
+            if balance is not None:
+                balance_2 = int(balance[0])
+                return balance_2
+            else:
                 return 0
-            return balance
 
         except (Exception, Error) as error:
             print("Ошибка при работе с PostgreSQL", error)
@@ -204,7 +249,7 @@ class Data:
                 print("Соединение с PostgreSQL закрыто")
 
     @staticmethod
-    def top_up_balance():
+    def top_up_balance(telegram_id, balance):
         try:
             connection = psycopg2.connect(user="postgres",
                                           password="Casa512472;)",
@@ -213,9 +258,13 @@ class Data:
                                           database="intership")
 
             cursor = connection.cursor()
+            if Data.get_balance(telegram_id) is None:
+                final_balance = int(balance)
+            else:
+                final_balance = int(Data.get_balance(telegram_id)) + int(balance)
             cursor.execute(f"""
-               UPDATE "user" SET balance = '{user.balance}'
-               WHERE "telegramId" = '{user.telegram_id}' 
+               UPDATE "user" SET balance = '{final_balance}'
+               WHERE "telegramId" = '{telegram_id}' 
                """)
 
         except (Exception, Error) as error:
@@ -228,7 +277,7 @@ class Data:
                 print("Соединение с PostgreSQL закрыто")
 
     @staticmethod
-    def get_role():
+    def get_role(telegram_id):
         try:
             connection = psycopg2.connect(user="postgres",
                                           password="Casa512472;)",
@@ -239,7 +288,7 @@ class Data:
             cursor = connection.cursor()
             cursor.execute(f"""
                SELECT role FROM "user"
-               WHERE "telegramId" = '{user.telegram_id}'
+               WHERE "telegramId" = '{telegram_id}'
                """)
             role = cursor.fetchone()
             return role[0]
@@ -329,7 +378,7 @@ class Data:
                 print("Соединение с PostgreSQL закрыто")
 
     @staticmethod
-    def check_subscribe():
+    def check_subscribe(telegram_id):
         try:
             connection = psycopg2.connect(user="postgres",
                                           password="Casa512472;)",
@@ -339,7 +388,7 @@ class Data:
 
             cursor = connection.cursor()
             cursor.execute(f"""
-            SELECT "traiderTelegramId" FROM "subscribe" WHERE "userTelegramId" = '{user.telegram_id}'
+            SELECT "traiderTelegramId" FROM "subscribe" WHERE "userTelegramId" = '{telegram_id}'
         """)
 
             record = cursor.fetchone()
@@ -358,7 +407,7 @@ class Data:
                 print("Соединение с PostgreSQL закрыто")
 
     @staticmethod
-    def get_amount_of_referralers():
+    def get_amount_of_referralers(telegram_id):
         try:
             connection = psycopg2.connect(user="postgres",
                                           password="Casa512472;)",
@@ -368,7 +417,7 @@ class Data:
 
             cursor = connection.cursor()
             cursor.execute(f"""
-            SELECT "userTelegramId" FROM "subscribe" WHERE "traiderTelegramId" = '{user.telegram_id}'
+            SELECT "userTelegramId" FROM "subscribe" WHERE "traiderTelegramId" = '{telegram_id}'
             """)
 
             record = cursor.fetchall()
@@ -384,3 +433,122 @@ class Data:
                 cursor.close()
                 connection.close()
                 print("Соединение с PostgreSQL закрыто")
+
+    @staticmethod
+    def get_api(telegram_id):
+        try:
+            connection = psycopg2.connect(user="postgres",
+                                          password="Casa512472;)",
+                                          host="127.0.0.1",
+                                          port="5432",
+                                          database="intership")
+
+            cursor = connection.cursor()
+            cursor.execute(f"""
+            SELECT "apiKey" FROM "user" WHERE "telegramId" = '{telegram_id}'
+            """)
+            result = cursor.fetchone()
+            return result[0]
+        except (Exception, Error) as error:
+            print("Ошибка при работе с PostgreSQL", error)
+        finally:
+            if connection:
+                cursor.close()
+                connection.close()
+                print("Соединение с PostgreSQL закрыто")
+
+    @staticmethod
+    def get_secret(telegram_id):
+        try:
+            connection = psycopg2.connect(user="postgres",
+                                          password="Casa512472;)",
+                                          host="127.0.0.1",
+                                          port="5432",
+                                          database="intership")
+
+            cursor = connection.cursor()
+            cursor.execute(f"""
+            SELECT "secretKey" FROM "user" WHERE "telegramId" = '{telegram_id}'
+            """)
+            result = cursor.fetchone()
+            return result[0]
+        except (Exception, Error) as error:
+            print("Ошибка при работе с PostgreSQL", error)
+        finally:
+            if connection:
+                cursor.close()
+                connection.close()
+                print("Соединение с PostgreSQL закрыто")
+
+    @staticmethod
+    def get_nickname(telegram_id):
+        try:
+            connection = psycopg2.connect(user="postgres",
+                                          password="Casa512472;)",
+                                          host="127.0.0.1",
+                                          port="5432",
+                                          database="intership")
+
+            cursor = connection.cursor()
+            cursor.execute(f"""
+            SELECT "nickname" FROM "user" WHERE "telegramId" = '{telegram_id}'
+            """)
+            result = cursor.fetchone()
+            return result[0]
+        except (Exception, Error) as error:
+            print("Ошибка при работе с PostgreSQL", error)
+        finally:
+            if connection:
+                cursor.close()
+                connection.close()
+                print("Соединение с PostgreSQL закрыто")
+
+
+    @staticmethod
+    def update_data_user_mailing(telegram_id, text):
+        try:
+            connection = psycopg2.connect(user="postgres",
+                                          password="Casa512472;)",
+                                          host="127.0.0.1",
+                                          port="5432",
+                                          database="intership")
+
+            cursor = connection.cursor()
+            cursor.execute(f"""
+        UPDATE "user" SET "description" = '{text}'
+        WHERE "telegramId" = '{telegram_id}'
+        """)
+
+        except (Exception, Error) as error:
+            print("Ошибка при работе с PostgreSQL", error)
+        finally:
+            if connection:
+                connection.commit()
+                cursor.close()
+                connection.close()
+                print("Соединение с PostgreSQL закрыто")
+
+
+    @staticmethod
+    def get_mailing(telegram_id):
+        try:
+            connection = psycopg2.connect(user="postgres",
+                                          password="Casa512472;)",
+                                          host="127.0.0.1",
+                                          port="5432",
+                                          database="intership")
+
+            cursor = connection.cursor()
+            cursor.execute(f"""
+            SELECT "description" FROM "user" WHERE "telegramId" = '{telegram_id}'
+            """)
+            result = cursor.fetchone()
+            return result[0]
+        except (Exception, Error) as error:
+            print("Ошибка при работе с PostgreSQL", error)
+        finally:
+            if connection:
+                cursor.close()
+                connection.close()
+                print("Соединение с PostgreSQL закрыто")
+
