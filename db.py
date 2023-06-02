@@ -233,7 +233,7 @@ class Data:
                """)
 
             balance = cursor.fetchone()
-            if balance is not None:
+            if balance[0] is not None:
                 balance_2 = int(balance[0])
                 return balance_2
             else:
@@ -503,7 +503,6 @@ class Data:
                 connection.close()
                 print("Соединение с PostgreSQL закрыто")
 
-
     @staticmethod
     def update_data_user_mailing(telegram_id, text):
         try:
@@ -528,7 +527,6 @@ class Data:
                 connection.close()
                 print("Соединение с PostgreSQL закрыто")
 
-
     @staticmethod
     def get_mailing(telegram_id):
         try:
@@ -551,4 +549,3 @@ class Data:
                 cursor.close()
                 connection.close()
                 print("Соединение с PostgreSQL закрыто")
-
